@@ -18,29 +18,29 @@ mkdir -p rootfs/tmp
 mkdir -p rootfs/bootstrap-seeds
 mkdir -p rootfs/bootstrap-seeds/POSIX
 mkdir -p rootfs/bootstrap-seeds/POSIX/x86
-cp -f src/kaem-minimal_s rootfs/bootstrap-seeds/POSIX/x86/kaem-optional-seed
-cp -f src/hex0_s rootfs/bootstrap-seeds/POSIX/x86/hex0-seed
+cp -f src/kaem-minimal.x86 rootfs/bootstrap-seeds/POSIX/x86/kaem-optional-seed
+cp -f src/hex0.x86 rootfs/bootstrap-seeds/POSIX/x86/hex0-seed
 
 # Copy root kaem script
-cp -f task3/kaem.x86 rootfs/kaem.x86
+cp -f target_x86/kaem.x86 rootfs/kaem.x86
 
 # Create and fill x86 specific directory with scripts and source files
 mkdir -p rootfs/x86
 mkdir -p rootfs/x86/artifact
 cp -f -t rootfs/x86 \
-    task3/tools-seed-kaem.kaem \
-    task3/tools-mini-kaem.kaem \
-    task3/check-tools.kaem \
-    task3/tools-kaem.kaem \
-    task3/after.kaem \
-    src/hex0_s.hex0 \
-    src/kaem-minimal_s.hex0 \
-    src/hex2_s.hex0 \
-    src/blood-elf_s.macro \
-    src/blood-elf_s.blood_elf \
-    src/M1_s.macro \
-    src/M1_s.blood_elf \
-    src/stack_c_s.M1 \
+    target_x86/tools-seed-kaem.kaem \
+    target_x86/tools-mini-kaem.kaem \
+    target_x86/check-tools.kaem \
+    target_x86/tools-kaem.kaem \
+    target_x86/after.kaem \
+    src/hex0.x86_hex0 \
+    src/kaem-minimal.x86_hex0 \
+    src/hex2.x86_hex0 \
+    src/blood-elf.macro_x86 \
+    src/blood-elf.blood_elf_x86 \
+    src/M1.macro_x86 \
+    src/M1.blood_elf_x86 \
+    src/stack_c.M1_x86 \
     src/stack_c_intro.M1 \
     M2libc/x86/ELF-x86-debug.hex2
 
@@ -79,13 +79,13 @@ cp -f -t rootfs/src \
     src/kaem-minimal.c
 
 # Copy scripts for processing steps
-cp -f task3/seed.kaem rootfs
-cp -f task3/configurator.x86.checksums rootfs
-cp -f task3/script-generator.x86.checksums rootfs
+cp -f target_x86/seed.kaem rootfs
+cp -f target_x86/configurator.x86.checksums rootfs
+cp -f target_x86/script-generator.x86.checksums rootfs
 
 # Copy steps
 cp -r steps rootfs
-cp -f task3/bootstrap.cfg rootfs/steps
+cp -f target_x86/bootstrap.cfg rootfs/steps
 
 # Copy the necessary distribution files
 mkdir rootfs/external
