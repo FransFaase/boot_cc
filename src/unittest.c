@@ -199,6 +199,8 @@ int main (int argc, char *argv[])
 	snprintf(buffer, 30, "(%d %d)", 123, -78);
 	is_true(strcmp(buffer, "(123 -78)") == 0, "sprintf 123 -78");
 	is_true(strcmp("A","A") == 0, "A = A");
+	is_true(strcmp("B","C") < 0, "B < C");
+	is_true(strcmp("B","A") > 0, "B > A");
 	char *mode = "r";
 	is_true(mode[0] == 'r', "mode[0] = r");
 	const char *eln = "\\n";
@@ -361,12 +363,12 @@ int main (int argc, char *argv[])
 
 	ssize_t neg = 0x3020100;
 #ifndef __TCC_CC_32__
-	neg += 0x7060504 << 32;
+	neg += 0x7060504LL << 32;
 #endif
 	for (size_t i = 0; i < sizeof(ssize_t); i++)
 	{
 		is_true(((neg >> (8 * i)) & 0xff) == i, ">>");
-		is_true((i << (8 * i)) == (neg & (0xff << (8 * i))), "<<");
+		is_true((i << (8 * i)) == (neg & (0xffLL << (8 * i))), "<<");
 	}
 
 #define VARA 4
@@ -378,7 +380,7 @@ int main (int argc, char *argv[])
 #endif
 
 	int diff = 400;
-	is_true(!(diff < -2147483648LL || diff > 2147483647LL), "bounds");
+	is_true(!(diff < -2147483648L || diff > 2147483647L), "bounds");
 
 	// From issue #15
 	{

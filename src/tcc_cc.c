@@ -2475,6 +2475,8 @@ expr_p parse_primary_expr(void)
 				nr_L++;
 		if (nr_L > 1 && expr->int_val > 0xFFFFFFFF)
 			fprintf(stderr, "%s Warning: long long const not supported\n", token_it_pos());
+		if (nr_L == 2)
+			expr->kind = '2';
 		next_token();
 		return expr;
 	}
@@ -2726,9 +2728,10 @@ expr_p parse_unary_expr(void)
 		expr_p expr = parse_unary_expr();
 		if (expr == NULL)
 			FAIL_NULL
-		if (expr->kind == '0')
+		if (expr->kind == '0' || expr->kind == '2')
 		{
 			expr_p neg_num = new_expr_int_value(-expr->int_val);
+			neg_num->kind = expr->kind;
 			neg_num->type = base_signed_type(expr->type);
 			return neg_num; 
 		}
@@ -2866,7 +2869,7 @@ void expr_dioper_set_type(expr_p expr)
 	if (type_is_integer(type_lhs) && type_is_integer(type_rhs))
 	{
 		int size = type_lhs->size > type_rhs->size ? type_lhs->size : type_rhs->size;
-		bool signed_int = (((int)type_lhs->base_type | (int)type_lhs->base_type) & 2) == 2;
+		bool signed_int = type_is_signed_integer(type_lhs) | type_is_signed_integer(type_rhs);
 		if (size == 8)
 			expr->type = signed_int ? base_type_S64 : base_type_U64;
 		else if (size == 4)
@@ -4375,6 +4378,32 @@ void expr_print_warning(expr_p expr, const char *mesg)
 	}
 }
 
+bool gen_cast(expr_p expr)
+{
+	switch (expr->type->base_type)
+	{
+		case BT_VOID: break;
+		case BT_U8: fprintf(fcode, "0xFF & "); break;
+		case BT_S8: fprintf(fcode, "char "); break;
+		case BT_U16: fprintf(fcode, "0xFFFF & "); break;
+		case BT_U32:
+			if (long_long_size == TARGET_64BITS)
+				fprintf(fcode, "0xFFFFFFFF & ");
+			break;
+		case BT_S32:
+			if (long_long_size == TARGET_64BITS)
+				fprintf(fcode, "long ");
+			break;
+		case BT_U64: break;
+		case BT_S64: break;
+		default:
+			return FALSE;
+			break;
+	}
+	return TRUE;
+}
+
+
 void gen_expr(expr_p expr, bool as_value)
 {
 	if (expr == NULL)
@@ -4394,7 +4423,10 @@ void gen_expr(expr_p expr, bool as_value)
 			fprintf(fcode, "%s ", expr->str_val);
 			break;
 		case '0':
+		case '2':
 			fprintf(fcode, "%u%s ", expr->int_val & 0xFFFFFFFF, signed_ind);
+			if (expr->kind == '2')
+				expr->type = type_is_signed_integer(expr->type) ? base_type_S64 : base_type_U64;
 			break;
 		case '"':
 			fprintf(fcode, "\"");
@@ -4427,30 +4459,11 @@ void gen_expr(expr_p expr, bool as_value)
 					expr_print_warning(expr, "Cast non base type to base type");
 				if (child_type->kind != TYPE_KIND_BASE || child_type->base_type != expr->type->base_type)
 				{
-					switch (expr->type->base_type)
+					if (!gen_cast(expr) && child_type->kind == TYPE_KIND_BASE)
 					{
-						case BT_VOID: break;
-						case BT_U8: fprintf(fcode, "0xFF & "); break;
-						case BT_S8: fprintf(fcode, "char "); break;
-						case BT_U16: fprintf(fcode, "0xFFFF & "); break;
-						case BT_U32:
-							if (long_long_size == TARGET_64BITS)
-								fprintf(fcode, "0xFFFFFFFF & ");
-							break;
-						case BT_S32:
-							if (long_long_size == TARGET_64BITS)
-								fprintf(fcode, "long ");
-							break;
-						case BT_U64: break;
-						case BT_S64: break;
-						default:
-							if (child_type->kind == TYPE_KIND_BASE)
-							{
-								char buffer[100];
-								sprintf(buffer, "Cast base type %d to %d", child_type->base_type, expr->type->base_type);
-								expr_print_warning(expr, buffer);
-							}
-							break;
+						char buffer[100];
+						sprintf(buffer, "Cast base type %d to %d", child_type->base_type, expr->type->base_type);
+						expr_print_warning(expr, buffer);
 					}
 				}
 			}
@@ -4529,6 +4542,8 @@ void gen_expr(expr_p expr, bool as_value)
 				case TK_NE: fprintf(fcode, "!= "); break;
 				default: fprintf(fcode, "%c ", expr->kind); break;
 			}
+			if (expr->kind == '+' || expr->kind == '-' || expr->kind == '*')
+				gen_cast(expr);
 			break;
 		case '=':
 			gen_expr(expr->children[0], FALSE);
