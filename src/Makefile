@@ -165,7 +165,7 @@ arm64 : tools stack_c_arm64 \
 	  equal.arm64
 
 # For building and running tests, use 'make arm64_tests'
-arm64_tests : arm64 unittest.arm64_OK stack_c_diff_arm64_OK tcc_cc_s tcc_cc_diff_arm64_OK diff3_arm64_OK diff5_arm64_OK diff4_arm64_OK
+arm64_tests : arm64 unittest.arm64_OK stack_c_diff_arm64_OK tcc_cc.arm64 tcc_cc_diff_arm64_OK diff3_arm64_OK diff5_arm64_OK diff4_arm64_OK
 
 # Self-contained tools (no stdlib.c); -D TCC_TARGET_ARM64=1 selects the aarch64 syscall
 # numbers in sys_syscall.h and the *at wrappers these tools define for arm64.
@@ -241,7 +241,7 @@ riscv64 : stack_c_riscv64 \
 	  equal.riscv64
 
 # For building and running tests, use 'make riscv64_tests'
-riscv64_tests : riscv64 unittest.riscv64_OK stack_c_diff_riscv64_OK tcc_cc_s tcc_cc_diff_riscv64_OK diff3_riscv64_OK diff5_riscv64_OK diff4_riscv64_OK
+riscv64_tests : riscv64 unittest.riscv64_OK stack_c_diff_riscv64_OK tcc_cc.risc64 tcc_cc_diff_riscv64_OK diff3_riscv64_OK diff5_riscv64_OK diff4_riscv64_OK
 
 # Self-contained tools (no stdlib.c); -D TCC_TARGET_RISCV64=1 selects the aarch64 syscall
 # numbers in sys_syscall.h and the *at wrappers these tools define for riscv64.
@@ -301,10 +301,8 @@ diff5_riscv64_OK : tcc_cc.riscv64.sl64 tcc_cc_triscv64.riscv64.sl64
 	./run.sh diff tcc_cc.riscv64.sl64 tcc_cc_triscv64.riscv64.sl64 diff5_riscv64_OK
 
 .PRECIOUS: \
-	%.sl \
-	%.M1_x86 %.blood_elf_x86 %.macro_x86 \
-	%.sl64 \
-	%.M1_amd64 %.blood_elf_amd64 %.macro_amd64 \
-	%.M1_arm64 %.blood_elf_arm64 %.macro_arm64 \
-	%.M1_riscv64 %.blood_elf_riscv64 %.macro_riscv64
+	%.sl %.M1_x86 %.blood_elf_x86 %.macro_x86 \
+	%.amd64.sl64 %.M1_amd64 %.blood_elf_amd64 %.macro_amd64 \
+	%.arm64.sl64 %.M1_arm64 %.blood_elf_arm64 %.macro_arm64 \
+	%.riscv64.sl64 %.M1_riscv64 %.blood_elf_riscv64 %.macro_riscv64
 .PHONY: all tools x86 amd64 arm64 arm64_tests riscv64 riscv64_tests
