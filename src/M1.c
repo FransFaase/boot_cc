@@ -99,7 +99,9 @@ int main(int argc, char *argv[])
                     if (*s <= ' ')
                     {
                         fputc(' ', fout);
-                        s++;
+                        do
+                            s++;
+                        while (*s == ' ');
                     }
                     else if ((*s == '%' || *s == '!') && (('0' <= s[1] && s[1] <= '9') || s[1] == '-'))
                     {
